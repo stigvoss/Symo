@@ -7,13 +7,13 @@ using System.Threading.Tasks;
 
 namespace Symo.Library.Extensibility.Attributes
 {
-    public class MonitorControlsAttribute : Attribute
+    public class ModuleInfoAttribute : Attribute
     {
         public string Name { get; set; }
         public Type MonitorControl { get; set; }
         public Type ConfigControl { get; set; }
 
-        public MonitorControlsAttribute(string name, Type displayControl, Type configControl)
+        public ModuleInfoAttribute(string name, Type displayControl, Type configControl)
         {
             Name = name;
 

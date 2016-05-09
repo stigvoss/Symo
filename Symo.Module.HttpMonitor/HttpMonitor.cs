@@ -12,7 +12,7 @@ using System.Threading.Tasks;
 
 namespace Symo.Module.HttpMonitor
 {
-    [MonitorControls("HTTP-based monitoring", typeof(HttpMonitorControl), typeof(HttpMonitorConfigControl))]
+    [ModuleInfo("HTTP-based monitoring", typeof(HttpMonitorControl), typeof(HttpMonitorConfigControl))]
     public class HttpMonitor : Library.Extensibility.Common.Monitor
     {
         private IEnumerable<HttpStatusCode> _acceptableStatusCodes = new List<HttpStatusCode>

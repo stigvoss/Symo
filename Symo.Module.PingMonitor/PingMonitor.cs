@@ -14,7 +14,7 @@ using System.Threading.Tasks;
 
 namespace Symo.Module.PingMonitor
 {
-    [MonitorControls("Ping-based monitoring", typeof(PingMonitorControl), typeof(PingMonitorConfigControl))]
+    [ModuleInfo("Ping-based monitoring", typeof(PingMonitorControl), typeof(PingMonitorConfigControl))]
     public class PingMonitor : Library.Extensibility.Common.Monitor
     {
         private ConnectionState _state;

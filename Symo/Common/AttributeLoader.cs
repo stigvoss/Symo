@@ -10,10 +10,10 @@ namespace Symo.Common
 {
     public static class AttributeLoader
     {
-        public static MonitorControlsAttribute GetMonitorControlsAttribute(Type type)
+        public static ModuleInfoAttribute GetMonitorControlsAttribute(Type type)
         {
-            var attributes = type.GetCustomAttributes(typeof(MonitorControlsAttribute), true);
-            var controlsAttributes = (MonitorControlsAttribute[])attributes;
+            var attributes = type.GetCustomAttributes(typeof(ModuleInfoAttribute), true);
+            var controlsAttributes = (ModuleInfoAttribute[])attributes;
             return controlsAttributes.FirstOrDefault();
         }
     }

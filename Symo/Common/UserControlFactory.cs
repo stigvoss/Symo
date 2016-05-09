@@ -10,12 +10,12 @@ namespace Symo.Common
 {
     public static class UserControlFactory
     {
-        public static IMonitorUserControl GetMonitorControl(MonitorControlsAttribute attribute)
+        public static IMonitorUserControl GetMonitorControl(ModuleInfoAttribute attribute)
         {
             return (IMonitorUserControl)Activator.CreateInstance(attribute.MonitorControl);
         }
 
-        public static IConfigUserControl GetConfigControl(MonitorControlsAttribute attribute)
+        public static IConfigUserControl GetConfigControl(ModuleInfoAttribute attribute)
         {
             return (IConfigUserControl)Activator.CreateInstance(attribute.ConfigControl);
         }
