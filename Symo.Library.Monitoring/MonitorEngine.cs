@@ -17,16 +17,12 @@ namespace Symo.Library.Monitoring
         public static MonitorEngine Instance { get { return _instance ?? (_instance = new MonitorEngine()); } }
 
         private ObservableCollection<IMonitor> _monitors;
-        private ObservableCollection<MonitorInfo> _monitorInfo;
 
         public ObservableCollection<IMonitor> Monitors { get { return _monitors; } }
-
-        public ObservableCollection<MonitorInfo> MonitorInfo { get { return _monitorInfo; } }
 
         public MonitorEngine()
         {
             _monitors = new ObservableCollection<IMonitor>();
-            _monitorInfo = new ObservableCollection<MonitorInfo>();
             _monitors.CollectionChanged += Monitors_Changed;
         }
 

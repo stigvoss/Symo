@@ -57,7 +57,6 @@
     <Compile Include="UserControls\ViewModels\PingViewModel.cs" />
     <Compile Include="PingInfo.cs" />
     <Compile Include="PingMonitor.cs" />
-    <Compile Include="PingMonitorConfiguration.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

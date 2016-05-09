@@ -79,9 +79,9 @@ namespace Symo
         {
             var modules = ModuleLoader.LoadModules();
             var configWindow = new ConfigWindow(modules);
-            configWindow.Configured += (window, server, config, type) =>
+            configWindow.Configured += (window, args) =>
             {
-                AddMonitor(type, server, config);
+                AddMonitor(args.MonitorType, args.Server, args.Configuration);
             };
             configWindow.Show();
         }

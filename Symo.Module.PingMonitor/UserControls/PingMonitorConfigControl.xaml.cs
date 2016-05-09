@@ -31,11 +31,7 @@ namespace Symo.Module.PingMonitor.UserControls
         {
             InitializeComponent();
             Server = new Server();
-            Configuration = new PingMonitorConfiguration
-            {
-                ChallengeDelay = 5000,
-                FailThreshold = 3
-            };
+            Configuration = new DefaultConfiguration();
             DataContext = Server;
         }
     }

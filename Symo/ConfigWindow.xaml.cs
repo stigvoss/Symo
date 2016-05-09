@@ -23,7 +23,14 @@ namespace Symo
     /// </summary>
     public partial class ConfigWindow : Window
     {
-        public delegate void ConfiguredEventHandler(object sender, IServer server, IConfiguration configuration, Type monitorType);
+        public delegate void ConfiguredEventHandler(object sender, ConfiguredEventArgs e);
+
+        public class ConfiguredEventArgs : EventArgs
+        {
+            public IServer Server { get; set; }
+            public IConfiguration Configuration { get; set; }
+            public Type MonitorType { get; set; }
+        }
 
         IEnumerable<Type> _monitorsTypes;
 
@@ -71,7 +78,13 @@ namespace Symo
         {
             if (_configControl != null)
             {
-                Configured?.Invoke(this, _configControl.Server, _configControl.Configuration, _monitorType);
+                var args = new ConfiguredEventArgs
+                {
+                    Server = _configControl.Server,
+                    Configuration = _configControl.Configuration,
+                    MonitorType = _monitorType
+                };
+                Configured?.Invoke(this, args);
             }
             Close();
         }
