@@ -10,7 +10,7 @@ namespace Symo.Library.Extensibility.Attributes
     public class MonitorControlsAttribute : Attribute
     {
         public string Name { get; set; }
-        public Type DisplayControl { get; set; }
+        public Type MonitorControl { get; set; }
         public Type ConfigControl { get; set; }
 
         public MonitorControlsAttribute(string name, Type displayControl, Type configControl)
@@ -19,7 +19,7 @@ namespace Symo.Library.Extensibility.Attributes
 
             if(displayControl.GetInterfaces().Contains(typeof(IMonitorUserControl)))
             {
-                DisplayControl = displayControl;
+                MonitorControl = displayControl;
             }
             
             if (configControl.GetInterfaces().Contains(typeof(IConfigUserControl)))

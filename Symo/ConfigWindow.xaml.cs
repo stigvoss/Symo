@@ -1,4 +1,5 @@
-﻿using Symo.Entities;
+﻿using Symo.Common;
+using Symo.Entities;
 using Symo.Library.Extensibility.Attributes;
 using Symo.Library.Extensibility.Interfaces;
 using Symo.Library.Modules;
@@ -72,19 +73,16 @@ namespace Symo
 
         private TypeListItem GetListItem(Type monitor)
         {
-            MonitorControlsAttribute attribute = GetTypeAttribute(monitor);
-            return new TypeListItem
+            var attribute = AttributeLoader.GetMonitorControlsAttribute(monitor);
+            var control = UserControlFactory.GetConfigControl(attribute);
+            var item = new TypeListItem
             {
                 Name = attribute.Name,
                 Type = monitor,
-                ConfigControl = (IConfigUserControl)Activator.CreateInstance(attribute.ConfigControl)
+                ConfigControl = control
             };
-        }
 
-        private static MonitorControlsAttribute GetTypeAttribute(Type monitor)
-        {
-            var attributes = monitor.GetCustomAttributes(typeof(MonitorControlsAttribute), true);
-            return (MonitorControlsAttribute)attributes.FirstOrDefault();
+            return item;
         }
 
         private void Button_Click(object sender, RoutedEventArgs e)
