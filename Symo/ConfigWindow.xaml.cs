@@ -36,11 +36,15 @@ namespace Symo
         public ConfigWindow(IEnumerable<Type> monitorTypes)
         {
             InitializeComponent();
-            ConfigFrame.NavigationUIVisibility = NavigationUIVisibility.Hidden;
+            ConfigureComponents();
+            AssignFields(monitorTypes);
+        }
 
-            _monitorsTypes = monitorTypes;
+        private void ConfigureComponents()
+        {
+            ContentFrame.NavigationUIVisibility = NavigationUIVisibility.Hidden;
 
-            TypeList.SelectionChanged += TypeList_SelectionChanged;
+            TypeList.SelectionChanged += SelectionChanged;
 
             foreach (Type monitor in _monitorsTypes)
             {
@@ -48,24 +52,39 @@ namespace Symo
             }
         }
 
-        private void TypeList_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        private void AssignFields(IEnumerable<Type> monitorTypes)
+        {
+            _monitorsTypes = monitorTypes;
+        }
+
+        private void SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             var item = (TypeListItem)e.AddedItems[0];
-            _configControl = item.ConfigControl;
-            _monitorType = item.Type;
+            SetTypeSelection(item);
+        }
 
-            ConfigFrame.Content = _configControl;
+        private void SetTypeSelection(TypeListItem selection)
+        {
+            _monitorType = selection.Type;
+            _configControl = selection.ConfigControl;
+            ContentFrame.Content = selection.ConfigControl;
         }
 
         private TypeListItem GetListItem(Type monitor)
         {
-            var attr = (MonitorControlsAttribute)monitor.GetCustomAttributes(typeof(MonitorControlsAttribute), true).FirstOrDefault();
+            MonitorControlsAttribute attribute = GetTypeAttribute(monitor);
             return new TypeListItem
             {
-                Name = attr.Name,
+                Name = attribute.Name,
                 Type = monitor,
-                ConfigControl = (IConfigUserControl)Activator.CreateInstance(attr.ConfigControl)
+                ConfigControl = (IConfigUserControl)Activator.CreateInstance(attribute.ConfigControl)
             };
+        }
+
+        private static MonitorControlsAttribute GetTypeAttribute(Type monitor)
+        {
+            var attributes = monitor.GetCustomAttributes(typeof(MonitorControlsAttribute), true);
+            return (MonitorControlsAttribute)attributes.FirstOrDefault();
         }
 
         private void Button_Click(object sender, RoutedEventArgs e)

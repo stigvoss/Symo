@@ -8,7 +8,7 @@
         Title="ConfigWindow" Height="300" Width="300">
     <Grid>
         <ComboBox Grid.Row="0" Name="TypeList" Margin="4,4,4,4"/>
-        <Frame Grid.Row="1"  Name="ConfigFrame" Margin="4,4,4,4"/>
+        <Frame Grid.Row="1"  Name="ContentFrame" Margin="4,4,4,4"/>
         <Button Grid.Row="2" Content="OK" Margin="4,4,4,4" Click="Button_Click"/>
 
         <Grid.RowDefinitions>
