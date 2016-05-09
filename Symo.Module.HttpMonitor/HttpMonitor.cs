@@ -13,84 +13,29 @@ using System.Threading.Tasks;
 namespace Symo.Module.HttpMonitor
 {
     [MonitorControls("HTTP-based monitoring", typeof(HttpMonitorControl), typeof(HttpMonitorConfigControl))]
-    public class HttpMonitor : IMonitor
+    public class HttpMonitor : Library.Extensibility.Common.Monitor
     {
-        private IServer _server;
-        private IConfiguration _configuration;
+        private IEnumerable<HttpStatusCode> _acceptableStatusCodes = new List<HttpStatusCode>
+        {
+            HttpStatusCode.OK,
+            HttpStatusCode.Redirect,
+            HttpStatusCode.Accepted,
+            HttpStatusCode.Continue,
+            HttpStatusCode.Moved,
+            HttpStatusCode.MovedPermanently
+        };
         private ConnectionState _state;
 
         private uint _failCount;
 
-        private Task _worker;
-        private CancellationTokenSource _cancellationTokenSource;
-
-        public IConfiguration Configuration { get { return _configuration; } set { _configuration = value; } }
-        public IServer Server { get { return _server; } set { _server = value; } }
-
-        public bool IsRunning
-        {
-            get
-            {
-                return _worker.Status == TaskStatus.Running ||
-                    _worker.Status == TaskStatus.WaitingToRun;
-            }
-        }
         public ConnectionState Status { get { return _state; } }
         public uint TotalRequestFailure { get; set; }
         public uint TotalRequestsSent { get; set; }
         public decimal RequestFailureRate { get { return (decimal)TotalRequestFailure / TotalRequestsSent; } }
 
-        public event UpdateStateEventHandler StateUpdated;
-        public event TriggerEventHandler Triggered;
-
         public HttpMonitor()
         {
             _failCount = 0;
-
-            _cancellationTokenSource = new CancellationTokenSource();
-            _worker = new Task(() =>
-            {
-                try
-                {
-                    while (true)
-                    {
-                        try
-                        {
-                            var http = WebRequest.CreateHttp(_server.Address);
-                            var reply = (HttpWebResponse)http.GetResponse();
-                            if (reply.StatusCode == HttpStatusCode.OK)
-                            {
-                                if (_state != ConnectionState.HEALTHY)
-                                {
-                                    _state = ConnectionState.HEALTHY;
-                                    StateUpdated?.Invoke(this, _state);
-                                    _failCount = 0;
-                                }
-                            }
-                            else
-                            {
-                                HandleFailure();
-                            }
-                        } catch (WebException)
-                        {
-                            HandleFailure();
-                        }
-                        TotalRequestsSent++;
-
-                        Triggered?.Invoke(this);
-                        _cancellationTokenSource.Token.ThrowIfCancellationRequested();
-                        Thread.Sleep(_configuration.ChallengeDelay);
-                    }
-
-                }
-                catch (OperationCanceledException ex)
-                {
-                    if (ex.CancellationToken.IsCancellationRequested)
-                    {
-                        StateUpdated(this, ConnectionState.UNKNOWN);
-                    }
-                }
-            }, _cancellationTokenSource.Token);
         }
 
         private void HandleFailure()
@@ -98,41 +43,46 @@ namespace Symo.Module.HttpMonitor
             _failCount++;
             TotalRequestFailure++;
 
-            if (_failCount == _configuration.FailThreshold - 1 && _state != ConnectionState.FAILED)
+            if (_failCount == Configuration.FailThreshold - 1 && _state != ConnectionState.FAILED)
             {
                 _state = ConnectionState.FAILED;
-                StateUpdated?.Invoke(this, _state);
+                OnStateUpdated(_state);
             }
 
             if (_state != ConnectionState.FAILED)
             {
                 _state = ConnectionState.UNHEALTY;
-                StateUpdated?.Invoke(this, _state);
+                OnStateUpdated(_state);
             }
         }
 
-        public void Start()
+        protected override void Monitoring()
         {
-            if (!IsRunning)
+            try
             {
-                _worker.Start();
+                var http = WebRequest.CreateHttp(Server.Address);
+                var reply = (HttpWebResponse)http.GetResponse();
+                if (_acceptableStatusCodes.Contains(reply.StatusCode))
+                {
+                    if (_state != ConnectionState.HEALTHY)
+                    {
+                        _state = ConnectionState.HEALTHY;
+                        OnStateUpdated(_state);
+                        _failCount = 0;
+                    }
+                }
+                else
+                {
+                    HandleFailure();
+                }
             }
-            else
+            catch (WebException)
             {
-                throw new InvalidOperationException();
+                HandleFailure();
             }
-        }
+            TotalRequestsSent++;
 
-        public void Stop()
-        {
-            if (IsRunning)
-            {
-                _cancellationTokenSource.Cancel();
-            }
-            else
-            {
-                throw new InvalidOperationException();
-            }
+            OnTriggered();
         }
     }
 }

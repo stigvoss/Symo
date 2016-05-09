@@ -1,4 +1,5 @@
 ﻿using Symo.Library.Extensibility.Attributes;
+using Symo.Library.Extensibility.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Linq;

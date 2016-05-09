@@ -43,7 +43,7 @@ namespace Symo
 
         private void Monitors_Changed(object sender, NotifyCollectionChangedEventArgs e)
         {
-            var items = (IEnumerable<IMonitor>)e.NewItems;
+            var items = e.NewItems.Cast<IMonitor>();
             HandleMonitorsChanged(items);
         }
 

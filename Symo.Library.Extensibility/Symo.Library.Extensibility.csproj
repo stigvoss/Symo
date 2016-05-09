@@ -46,6 +46,7 @@
     <Compile Include="Common\ConnectionState.cs" />
     <Compile Include="Attributes\MonitorControlsAttribute.cs" />
     <Compile Include="Common\DefaultConfiguration.cs" />
+    <Compile Include="Common\Monitor.cs" />
     <Compile Include="Common\Server.cs" />
     <Compile Include="Interfaces\IConfiguration.cs" />
     <Compile Include="Interfaces\IConfigUserControl.cs" />

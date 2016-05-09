@@ -37,8 +37,8 @@ namespace Symo
         public ConfigWindow(IEnumerable<Type> monitorTypes)
         {
             InitializeComponent();
-            ConfigureComponents();
             AssignFields(monitorTypes);
+            ConfigureComponents();
         }
 
         private void ConfigureComponents()
