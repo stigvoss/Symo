@@ -1,4 +1,6 @@
-﻿using Symo.Library.Extensibility.Attributes;
+﻿using Symo.Common;
+using Symo.Entities;
+using Symo.Library.Extensibility.Attributes;
 using Symo.Library.Extensibility.Common;
 using Symo.Library.Extensibility.Interfaces;
 using Symo.Library.Modules;
@@ -31,34 +33,54 @@ namespace Symo
         public MainWindow()
         {
             InitializeComponent();
+            AssignEvents();
+        }
+
+        private void AssignEvents()
+        {
             MonitorEngine.Instance.Monitors.CollectionChanged += Monitors_Changed;
         }
 
         private void Monitors_Changed(object sender, NotifyCollectionChangedEventArgs e)
         {
-            var items = e.NewItems;
+            var items = (IEnumerable<IMonitor>)e.NewItems;
+            HandleMonitorsChanged(items);
+        }
+
+        private void HandleMonitorsChanged(IEnumerable<IMonitor> items)
+        {
             foreach (IMonitor monitor in items)
             {
                 var control = CreateMonitorControl(monitor);
 
-                if(control != null)
+                if (control != null)
                 {
-                    monitor.Triggered += control.Monitor_Triggered;
-
-                    Dispatcher.Invoke(() =>
-                    {
-                        BasePanel.Children.Add((UserControl)control);
-                    });
+                    AssignMonitorEvent(monitor, control);
+                    AddControl(control);
                 }
             }
         }
 
-        private IMonitorUserControl CreateMonitorControl(object obj)
+        private static void AssignMonitorEvent(IMonitor monitor, IMonitorUserControl control)
         {
-            Type type = obj.GetType();
-            var controlAttribute = (MonitorControlsAttribute)type.GetCustomAttributes(typeof(MonitorControlsAttribute), true).FirstOrDefault();
+            monitor.Triggered += control.Monitor_Triggered;
+        }
 
-            return (IMonitorUserControl)Activator.CreateInstance(controlAttribute.DisplayControl);
+        private void AddControl(IMonitorUserControl control)
+        {
+            Dispatcher.Invoke(() =>
+            {
+                BasePanel.Children.Add((UserControl)control);
+            });
+        }
+
+        private IMonitorUserControl CreateMonitorControl(IMonitor monitor)
+        {
+            Type monitorType = monitor.GetType();
+            var attribute = AttributeLoader.GetMonitorControlsAttribute(monitorType);
+            var control = UserControlFactory.GetMonitorControl(attribute);
+
+            return control;
         }
 
         private void AddMonitor<T>(IServer server, IConfiguration configuration)
@@ -79,11 +101,13 @@ namespace Symo
         {
             var modules = ModuleLoader.LoadModules();
             var configWindow = new ConfigWindow(modules);
-            configWindow.Configured += (window, args) =>
-            {
-                AddMonitor(args.MonitorType, args.Server, args.Configuration);
-            };
+            configWindow.Configured += Configured;
             configWindow.Show();
+        }
+
+        private void Configured(object sender, ConfiguredEventArgs e)
+        {
+            AddMonitor(e.MonitorType, e.Server, e.Configuration);
         }
     }
 }

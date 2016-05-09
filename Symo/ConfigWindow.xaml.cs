@@ -1,4 +1,6 @@
-﻿using Symo.Library.Extensibility.Attributes;
+﻿using Symo.Common;
+using Symo.Entities;
+using Symo.Library.Extensibility.Attributes;
 using Symo.Library.Extensibility.Interfaces;
 using Symo.Library.Modules;
 using System;
@@ -25,13 +27,6 @@ namespace Symo
     {
         public delegate void ConfiguredEventHandler(object sender, ConfiguredEventArgs e);
 
-        public class ConfiguredEventArgs : EventArgs
-        {
-            public IServer Server { get; set; }
-            public IConfiguration Configuration { get; set; }
-            public Type MonitorType { get; set; }
-        }
-
         IEnumerable<Type> _monitorsTypes;
 
         public event ConfiguredEventHandler Configured;
@@ -42,11 +37,15 @@ namespace Symo
         public ConfigWindow(IEnumerable<Type> monitorTypes)
         {
             InitializeComponent();
-            ConfigFrame.NavigationUIVisibility = NavigationUIVisibility.Hidden;
+            ConfigureComponents();
+            AssignFields(monitorTypes);
+        }
 
-            _monitorsTypes = monitorTypes;
+        private void ConfigureComponents()
+        {
+            ContentFrame.NavigationUIVisibility = NavigationUIVisibility.Hidden;
 
-            TypeList.SelectionChanged += TypeList_SelectionChanged;
+            TypeList.SelectionChanged += SelectionChanged;
 
             foreach (Type monitor in _monitorsTypes)
             {
@@ -54,24 +53,36 @@ namespace Symo
             }
         }
 
-        private void TypeList_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        private void AssignFields(IEnumerable<Type> monitorTypes)
         {
-            var item = (ListItem)e.AddedItems[0];
-            _configControl = item.ConfigControl;
-            _monitorType = item.Type;
-
-            ConfigFrame.Content = _configControl;
+            _monitorsTypes = monitorTypes;
         }
 
-        private ListItem GetListItem(Type monitor)
+        private void SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            var attr = (MonitorControlsAttribute)monitor.GetCustomAttributes(typeof(MonitorControlsAttribute), true).FirstOrDefault();
-            return new ListItem
+            var item = (TypeListItem)e.AddedItems[0];
+            SetTypeSelection(item);
+        }
+
+        private void SetTypeSelection(TypeListItem selection)
+        {
+            _monitorType = selection.Type;
+            _configControl = selection.ConfigControl;
+            ContentFrame.Content = selection.ConfigControl;
+        }
+
+        private TypeListItem GetListItem(Type monitor)
+        {
+            var attribute = AttributeLoader.GetMonitorControlsAttribute(monitor);
+            var control = UserControlFactory.GetConfigControl(attribute);
+            var item = new TypeListItem
             {
-                Name = attr.Name,
+                Name = attribute.Name,
                 Type = monitor,
-                ConfigControl = (IConfigUserControl)Activator.CreateInstance(attr.ConfigControl)
+                ConfigControl = control
             };
+
+            return item;
         }
 
         private void Button_Click(object sender, RoutedEventArgs e)
@@ -87,17 +98,6 @@ namespace Symo
                 Configured?.Invoke(this, args);
             }
             Close();
-        }
-
-        private class ListItem
-        {
-            public IConfigUserControl ConfigControl { get; internal set; }
-            public string Name { get; set; }
-            public Type Type { get; set; }
-            public override string ToString()
-            {
-                return Name;
-            }
         }
     }
 }
