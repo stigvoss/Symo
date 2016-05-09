@@ -1,4 +1,5 @@
-﻿using Symo.Library.Extensibility.Attributes;
+﻿using Symo.Entities;
+using Symo.Library.Extensibility.Attributes;
 using Symo.Library.Extensibility.Interfaces;
 using Symo.Library.Modules;
 using System;
@@ -25,13 +26,6 @@ namespace Symo
     {
         public delegate void ConfiguredEventHandler(object sender, ConfiguredEventArgs e);
 
-        public class ConfiguredEventArgs : EventArgs
-        {
-            public IServer Server { get; set; }
-            public IConfiguration Configuration { get; set; }
-            public Type MonitorType { get; set; }
-        }
-
         IEnumerable<Type> _monitorsTypes;
 
         public event ConfiguredEventHandler Configured;
@@ -56,17 +50,17 @@ namespace Symo
 
         private void TypeList_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            var item = (ListItem)e.AddedItems[0];
+            var item = (TypeListItem)e.AddedItems[0];
             _configControl = item.ConfigControl;
             _monitorType = item.Type;
 
             ConfigFrame.Content = _configControl;
         }
 
-        private ListItem GetListItem(Type monitor)
+        private TypeListItem GetListItem(Type monitor)
         {
             var attr = (MonitorControlsAttribute)monitor.GetCustomAttributes(typeof(MonitorControlsAttribute), true).FirstOrDefault();
-            return new ListItem
+            return new TypeListItem
             {
                 Name = attr.Name,
                 Type = monitor,
@@ -87,17 +81,6 @@ namespace Symo
                 Configured?.Invoke(this, args);
             }
             Close();
-        }
-
-        private class ListItem
-        {
-            public IConfigUserControl ConfigControl { get; internal set; }
-            public string Name { get; set; }
-            public Type Type { get; set; }
-            public override string ToString()
-            {
-                return Name;
-            }
         }
     }
 }
