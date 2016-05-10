@@ -9,6 +9,6 @@ namespace Symo.Library.Persistence
 {
     public class Context : DbContext
     {
-        public DbSet<Configuration> Configurations { get; set; }
+        public DbSet<KeyValueGroup> Configurations { get; set; }
     }
 }

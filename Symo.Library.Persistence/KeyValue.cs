@@ -8,6 +8,6 @@
 
         public object Value { get; set; }
 
-        public Configuration Configuration { get; set; }
+        public KeyValueGroup Configuration { get; set; }
     }
 }

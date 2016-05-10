@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Symo.Library.Persistence
 {
-    public class Configuration
+    public class KeyValueGroup
     {
         public int ID { get; set; }
 
